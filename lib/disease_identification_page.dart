@@ -64,7 +64,7 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plant Disease Identifies'),
+        title: const Text('Plant Disease Identifier'),
       ),
       body: SingleChildScrollView(
         child: uploadingImage
