@@ -10,3 +10,7 @@
 - http
 - image_picker
 - flutter_dotenv
+
+## Notes
+- The `PlantApi` & `Diagnosis Box` classes are refactorable.
+- Move them to separate files and just import them (don't forget to move the required imports with them too).
