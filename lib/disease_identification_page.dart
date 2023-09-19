@@ -42,7 +42,7 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
         Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
     final request = http.MultipartRequest('POST', url)
       ..fields['upload_preset'] = 'lmqyq1fs'
-      ..files.add(await http.MultipartFile.fromPath('file', image!.path));
+      ..files.add(await http.MultipartFile.fromPath('file', image.path));
     final response = await request.send();
 
     if (response.statusCode == 200) {
@@ -69,8 +69,11 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
       body: SingleChildScrollView(
         child: uploadingImage
             ? const Center(
-                child: Text("Uploading Image...",
-                    style: TextStyle(fontWeight: FontWeight.bold)))
+                child: Text(
+                  "Uploading Image...",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
