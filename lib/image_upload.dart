@@ -6,21 +6,25 @@ import 'dart:io';
 
 import 'package:image_picker/image_picker.dart';
 import 'plant-api.dart';
+import 'diagonosis_box.dart';
 
-class CloudinaryExample extends StatefulWidget {
-  const CloudinaryExample({super.key});
+class DiseaseIdentifier extends StatefulWidget {
+  const DiseaseIdentifier({super.key});
 
   @override
-  State<CloudinaryExample> createState() => _CloudinaryExampleState();
+  State<DiseaseIdentifier> createState() => _DiseaseIdentifierState();
 }
 
 File? pickedImage;
 String? CloudImageUrl;
-bool loading = false;
+bool uploadingImage = false;
 String cloudName = "dw5j5q9jz";
-bool notUploaded = true;
+bool testable = false;
+Map<String, dynamic> diagnosisData = {};
+bool diagnosisAvailable = false;
+bool diagnosingImage = false;
 
-class _CloudinaryExampleState extends State<CloudinaryExample> {
+class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
   Future<void> pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
 
@@ -33,6 +37,11 @@ class _CloudinaryExampleState extends State<CloudinaryExample> {
   }
 
   Future<void> _uploadImage(File image) async {
+    setState(() {
+      uploadingImage = true;
+      testable = false;
+    });
+
     final url =
         Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
     final request = http.MultipartRequest('POST', url)
@@ -46,7 +55,8 @@ class _CloudinaryExampleState extends State<CloudinaryExample> {
       final jsonMap = jsonDecode(responseString);
       setState(() {
         CloudImageUrl = jsonMap['url'];
-        notUploaded = false;
+        uploadingImage = false;
+        testable = true;
       });
       print(CloudImageUrl);
     } else {
@@ -60,55 +70,83 @@ class _CloudinaryExampleState extends State<CloudinaryExample> {
       appBar: AppBar(
         title: const Text('Cloudinary Example'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: notUploaded
-            ? const Center(child: Text('Uploading..'))
+      body: SingleChildScrollView(
+        child: uploadingImage
+            ? const Center(
+                child: Text("Uploading Image...",
+                    style: TextStyle(fontWeight: FontWeight.bold)))
             : Column(
-                //crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: pickedImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.file(
-                                pickedImage!,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : const Center(
-                              child: Text(
-                                'No image selected.',
-                                style: TextStyle(fontSize: 16.0),
-                              ),
-                            ),
+                  Container(
+                    height: 300,
+                    width: 300,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
+                    child: pickedImage != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.file(
+                              pickedImage!,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : const Center(
+                            child: Text(
+                              'No image selected.',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                          ),
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await pickImage(ImageSource.gallery);
-                    },
-                    child: const Text('Upload from gallery'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await pickImage(ImageSource.camera);
-                    },
-                    child: const Text('Upload from Camera'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await PlantApi().identifyPlant(CloudImageUrl!);
-                    },
-                    child: const Text('Test the api'),
-                  )
+                  uploadingImage
+                      ? const Center(
+                          child: Text("Uploading Image...",
+                              style: TextStyle(fontWeight: FontWeight.bold)))
+                      : Column(
+                          children: [
+                            testable
+                                ? ElevatedButton(
+                                    onPressed: () async {
+                                      setState(() {
+                                        diagnosingImage = true;
+                                      });
+                                      Map<String, dynamic> data =
+                                          await PlantApi()
+                                              .identifyPlant(CloudImageUrl!);
+
+                                      setState(() {
+                                        diagnosingImage = false;
+                                        diagnosisData = data;
+                                        diagnosisAvailable = true;
+                                      });
+                                    },
+                                    child: const Text('Diagnose the plant'),
+                                  )
+                                : const SizedBox(),
+                            ElevatedButton(
+                              onPressed: () async {
+                                await pickImage(ImageSource.gallery);
+                              },
+                              child: const Text('Upload from gallery'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                await pickImage(ImageSource.camera);
+                              },
+                              child: const Text('Upload from Camera'),
+                            ),
+                          ],
+                        ),
+                  diagnosisAvailable
+                      ? DiagnosisBox(data: diagnosisData)
+                      : diagnosingImage
+                          ? const Center(
+                              child: Text('Diagnosing plant'),
+                            )
+                          : const SizedBox()
                 ],
               ),
       ),
