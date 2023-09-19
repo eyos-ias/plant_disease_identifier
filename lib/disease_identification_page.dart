@@ -15,7 +15,6 @@ class DiseaseIdentifier extends StatefulWidget {
 File? pickedImage;
 String? cloudImageUrl;
 bool uploadingImage = false;
-//String CloudiPreset = "dw5j5q9jz";
 String CloudiPreset = dotenv.env['CLOUDINARY_PRESET']!;
 bool testable = false;
 Map<String, dynamic> diagnosisData = {};
@@ -189,7 +188,6 @@ class DiagnosisBox extends StatelessWidget {
 class PlantApi {
   Future<Map<String, dynamic>> identifyPlant(String imageUrl) async {
     print('Identifying plant...');
-    //const String apiKey = "GRNTolRKPjkhh3GtVnlgaEvLIrRPsmUaH0odzDbLyyA1m2bYdJ";
     String apiKey = dotenv.env['PLANT_API_KEY']!;
     const String apiUrl = "https://api.plant.id/v2/health_assessment";
 
