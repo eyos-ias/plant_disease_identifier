@@ -12,7 +12,7 @@ class DiseaseIdentifier extends StatefulWidget {
 }
 
 File? pickedImage;
-String? CloudImageUrl;
+String? cloudImageUrl;
 bool uploadingImage = false;
 String cloudName = "dw5j5q9jz";
 bool testable = false;
@@ -50,11 +50,11 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
       final responseString = String.fromCharCodes(responseData);
       final jsonMap = jsonDecode(responseString);
       setState(() {
-        CloudImageUrl = jsonMap['url'];
+        cloudImageUrl = jsonMap['url'];
         uploadingImage = false;
         testable = true;
       });
-      print(CloudImageUrl);
+      print(cloudImageUrl);
     } else {
       print(response.reasonPhrase);
     }
@@ -64,7 +64,7 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cloudinary Example'),
+        title: const Text('Plant Disease Identifies'),
       ),
       body: SingleChildScrollView(
         child: uploadingImage
@@ -111,7 +111,7 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
                                       });
                                       Map<String, dynamic> data =
                                           await PlantApi()
-                                              .identifyPlant(CloudImageUrl!);
+                                              .identifyPlant(cloudImageUrl!);
 
                                       setState(() {
                                         diagnosingImage = false;

@@ -5,8 +5,6 @@ import 'package:disease_identifier/disease_identification_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  // CloudinaryContext.cloudinary =
-  //     Cloudinary.fromCloudName(cloudName: "dw5j5q9jz");
   runApp(App());
 }
 
