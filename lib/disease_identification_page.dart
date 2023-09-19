@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DiseaseIdentifier extends StatefulWidget {
   const DiseaseIdentifier({super.key});
@@ -14,7 +15,8 @@ class DiseaseIdentifier extends StatefulWidget {
 File? pickedImage;
 String? cloudImageUrl;
 bool uploadingImage = false;
-String cloudName = "dw5j5q9jz";
+//String CloudiPreset = "dw5j5q9jz";
+String CloudiPreset = dotenv.env['CLOUDINARY_PRESET']!;
 bool testable = false;
 Map<String, dynamic> diagnosisData = {};
 bool diagnosisAvailable = false;
@@ -39,7 +41,7 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
     });
 
     final url =
-        Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+        Uri.parse('https://api.cloudinary.com/v1_1/$CloudiPreset/image/upload');
     final request = http.MultipartRequest('POST', url)
       ..fields['upload_preset'] = 'lmqyq1fs'
       ..files.add(await http.MultipartFile.fromPath('file', image.path));
@@ -172,10 +174,10 @@ class DiagnosisBox extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('$key:'),
-              if (value is Map<String, dynamic>) // Check if the value is a map
-                DiagnosisBox(data: value) // Recursively create a KeyValueWidget
+              if (value is Map<String, dynamic>)
+                DiagnosisBox(data: value) // Recursive thingy goes BRRRRRRRR
               else
-                Text('  $value'), // Display the value as text
+                Text('  $value'),
             ],
           ),
         );
@@ -187,7 +189,8 @@ class DiagnosisBox extends StatelessWidget {
 class PlantApi {
   Future<Map<String, dynamic>> identifyPlant(String imageUrl) async {
     print('Identifying plant...');
-    const String apiKey = "GRNTolRKPjkhh3GtVnlgaEvLIrRPsmUaH0odzDbLyyA1m2bYdJ";
+    //const String apiKey = "GRNTolRKPjkhh3GtVnlgaEvLIrRPsmUaH0odzDbLyyA1m2bYdJ";
+    String apiKey = dotenv.env['PLANT_API_KEY']!;
     const String apiUrl = "https://api.plant.id/v2/health_assessment";
 
     final List<String> imageUrls = [imageUrl];
