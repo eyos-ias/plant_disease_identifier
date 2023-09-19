@@ -1,12 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
-
 import 'package:image_picker/image_picker.dart';
-import 'plant-api.dart';
-import 'diagonosis_box.dart';
 
 class DiseaseIdentifier extends StatefulWidget {
   const DiseaseIdentifier({super.key});
@@ -151,5 +147,96 @@ class _DiseaseIdentifierState extends State<DiseaseIdentifier> {
               ),
       ),
     );
+  }
+}
+
+class DiagnosisBox extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  DiagnosisBox({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: data.entries.map((entry) {
+        final key = entry.key;
+        final value = entry.value;
+
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('$key:'),
+              if (value is Map<String, dynamic>) // Check if the value is a map
+                DiagnosisBox(data: value) // Recursively create a KeyValueWidget
+              else
+                Text('  $value'), // Display the value as text
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class PlantApi {
+  Future<Map<String, dynamic>> identifyPlant(String imageUrl) async {
+    print('Identifying plant...');
+    const String apiKey = "GRNTolRKPjkhh3GtVnlgaEvLIrRPsmUaH0odzDbLyyA1m2bYdJ";
+    const String apiUrl = "https://api.plant.id/v2/health_assessment";
+
+    final List<String> imageUrls = [imageUrl];
+
+    final List<String> base64Images = await Future.wait(
+      imageUrls.map((imageUrl) async {
+        return await encodeImageFromUrl(imageUrl);
+      }),
+    );
+
+    final Map<String, dynamic> params = {
+      "images": base64Images,
+      "latitude": 49.1951239,
+      "longitude": 16.6077111,
+      "datetime": 1582830233,
+      "language": "en",
+      "disease_details": [
+        "cause",
+        "common_names",
+        "classification",
+        "description",
+        "treatment",
+      ],
+    };
+
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+      "Api-Key": apiKey,
+    };
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: headers,
+      body: jsonEncode(params),
+    );
+
+    if (response.statusCode == 200) {
+      print(json.decode(response.body)['health_assessment']['diseases']);
+      return json.decode(response.body)['health_assessment'];
+    } else {
+      throw Exception('Failed to identify plant: ${response.statusCode}');
+    }
+  }
+
+  Future<String> encodeImageFromUrl(String imageUrl) async {
+    final response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode == 200) {
+      final bytes = response.bodyBytes;
+      return base64Encode(bytes);
+    } else {
+      throw Exception(
+          'Failed to fetch and encode image: ${response.statusCode}');
+    }
   }
 }
